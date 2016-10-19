@@ -15,6 +15,7 @@ module.exports = exports = Player;
 function Player(position, canvas) {
   this.worldWidth = canvas.width;
   this.worldHeight = canvas.height;
+
   this.state = "idle";
   this.position = {
     x: position.x,
@@ -29,50 +30,24 @@ function Player(position, canvas) {
   this.thrusting = false;
   this.steerLeft = false;
   this.steerRight = false;
+  //this.fire = false;        // for shooting lasers
 
-  var self = this;
-  window.onkeydown = function(event) {
-    switch(event.key) {
-      case 'ArrowUp': // up
-      case 'w':
-        self.thrusting = true;
-        break;
-      case 'ArrowLeft': // left
-      case 'a':
-        self.steerLeft = true;
-        break;
-      case 'ArrowRight': // right
-      case 'd':
-        self.steerRight = true;
-        break;
-    }
-  }
+  //var self = this;
 
-  window.onkeyup = function(event) {
-    switch(event.key) {
-      case 'ArrowUp': // up
-      case 'w':
-        self.thrusting = false;
-        break;
-      case 'ArrowLeft': // left
-      case 'a':
-        self.steerLeft = false;
-        break;
-      case 'ArrowRight': // right
-      case 'd':
-        self.steerRight = false;
-        break;
-    }
-  }
 }
 
-
+// fire lasers.
+//Player.prototype.fire = function() {
+//  return this.fire;
+//}
 
 /**
  * @function updates the player object
  * {DOMHighResTimeStamp} time the elapsed time since the last frame
  */
 Player.prototype.update = function(time) {
+  //console.log("Player:UPDATE Begin = ");
+
   // Apply angular velocity
   if(this.steerLeft) {
     this.angle += time * 0.005;
@@ -86,6 +61,7 @@ Player.prototype.update = function(time) {
       x: Math.sin(this.angle),
       y: Math.cos(this.angle)
     }
+    //console.log("acceleration = " + acceleration);
     this.velocity.x -= acceleration.x;
     this.velocity.y -= acceleration.y;
   }
@@ -108,26 +84,29 @@ Player.prototype.render = function(time, ctx) {
   ctx.save();
 
   // Draw player's ship
-  ctx.translate(this.position.x, this.position.y);
-  ctx.rotate(-this.angle);
-  ctx.beginPath();
-  ctx.moveTo(0, -10);
-  ctx.lineTo(-10, 10);
-  ctx.lineTo(0, 0);
-  ctx.lineTo(10, 10);
-  ctx.closePath();
-  ctx.strokeStyle = 'white';
-  ctx.stroke();
-
-  // Draw engine thrust
-  if(this.thrusting) {
+  if(this.state != "dead") {
+    ctx.translate(this.position.x, this.position.y);
+    ctx.rotate(-this.angle);
     ctx.beginPath();
-    ctx.moveTo(0, 20);
-    ctx.lineTo(5, 10);
-    ctx.arc(0, 10, 5, 0, Math.PI, true);
+    ctx.moveTo(0, -10);
+    ctx.lineTo(-10, 10);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(10, 10);
     ctx.closePath();
-    ctx.strokeStyle = 'orange';
+    ctx.strokeStyle = 'white';
     ctx.stroke();
+
+    // Draw engine thrust
+    if(this.thrusting) {
+      ctx.beginPath();
+      ctx.moveTo(0, 20);
+      ctx.lineTo(5, 10);
+      ctx.arc(0, 10, 5, 0, Math.PI, true);
+      ctx.closePath();
+      ctx.strokeStyle = 'red';
+      ctx.stroke();
+    }
   }
+
   ctx.restore();
 }
